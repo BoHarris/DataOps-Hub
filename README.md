@@ -1,6 +1,7 @@
 🚀 DataOps Hub: A Privacy-Conscious Data Processing Pipeline
 ```
-DataOps Hub is a modular data processing pipeline built for transforming, aggregating, and exporting structured datasets — with a strong focus on clean, interpretable, and privacy-aware workflows.
+DataOps Hub is a modular data processing pipeline built for transforming, aggregating, and exporting structured datasets
+ — with a strong focus on clean, interpretable, and privacy-aware workflows.
 
 This project simulates a real-world DataOps workflow by incorporating:
 ```
