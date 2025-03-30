@@ -97,4 +97,4 @@ Suggest a new pattern or feature
 Help tune the model with better training samples
 
 📜 License
-MIT License © 2025 Bo
+MIT License © 2025 Bo Harris 
