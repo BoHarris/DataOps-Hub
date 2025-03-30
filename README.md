@@ -96,5 +96,44 @@ Suggest a new pattern or feature
 
 Help tune the model with better training samples
 
+🔄 In Progress / Upcoming
+```
+🖥️ CLI Tool
+Run predictions/redactions from terminal
+Print risk score and detected columns
+Support --redact flag to auto-redact
+
+ 🧠 User-selected Redaction
+After prediction, allow users to choose which PII columns to redact
+Add FastAPI support for redaction overrides
+
+ 📈 Performance Tracking
+Track prediction accuracy and false positives over time
+Include a confusion matrix in model training
+
+ 🔍 Custom Regex Profiles per Client
+Configurable sensitivity settings (email is PII for one client, not for another)
+Client-based regex or column rules
+
+ 📁 Support for XLSX files
+Add optional support for Excel input format
+
+ 🔐 Differential Privacy Mode
+Add option to "noisify" values instead of full redaction
+Use pseudonymization/anonymization strategies
+
+ 🧪 Unit and Integration Tests
+Coverage for model prediction, redaction, and API endpoints
+
+ 🧾 API Docs Update
+Improve /docs endpoint descriptions
+Example file and schema in FastAPI Swagger UI
+
+ 🧠 Model Tuning
+Add more training data
+Try different classifiers or ensemble methods
+Save feature importance report
+```
+
 📜 License
 MIT License © 2025 Bo Harris 
