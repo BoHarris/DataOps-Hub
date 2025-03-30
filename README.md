@@ -1,40 +1,100 @@
-🚀 DataOps Hub: A Privacy-Conscious Data Processing Pipeline
-```
-DataOps Hub is a modular data processing pipeline built for transforming, aggregating, and exporting structured datasets
- — with a strong focus on clean, interpretable, and privacy-aware workflows.
+# 🔐 PII Sentinel – Real-Time PII Detection & Redaction API
 
-This project simulates a real-world DataOps workflow by incorporating:
-```
-✅ Data ingestion and validation
-```
-🧹 Cleaning and normalization
+PII Sentinel is a FastAPI-based application that uses machine learning and pattern-based detection to identify and redact Personally Identifiable Information (PII) in CSV files.
 
-📊 Feature transformation (e.g., age categorization)
-
-📈 Data aggregation and export
+## 🚀 Features
 ```
-📁 Structured output for downstream machine learning or analytics
+- 📁 Upload CSVs and automatically detect sensitive columns.
+- 🧠 Predict PII columns using a trained Random Forest classifier.
+- ✂️ Redact sensitive fields in real time.
+- 🔎 Uses regex scanning for extra pattern-based redaction.
+- 🔧 Includes CLI tools and modular design for scalability.
+- 🧬 Custom feature engineering to boost PII prediction accuracy.
 ```
-🔧 Key Features
-Automated ETL: End-to-end data processing from raw .csv to clean, enriched datasets
 
-Privacy Sensitivity: Designed to pair with privacy-related ML tools (like your PII detection classifier)
+## ⚙️ Recent Changes
 
-Extensible Pipeline: Built with clarity and modularity for future integration with AI/ML or compliance checks
-
-Logging-First Design: Real-time logging to trace every pipeline step and support audit readiness
+### ✅ Model and Feature Enhancements
 ```
-📁 Output Structure
-```
-processed_train.csv: Cleaned, normalized dataset
+- **Added new metadata features for training**:
+  - `length`, `num_underscores`, `num_digits`
+  - `has_at`, `has_email_keyword`
+  - `has_digits_only`, `has_alpha_only`
+  - `has_special_chars`, `is_title_case`
 
-aggregated_processed_train.csv: Grouped and summarized data for exploratory insights
-```
-💡 Use Cases
-```
-Preprocessing datasets for AI/ML privacy applications
+- **New feature engineering logic** in `pii_features.py` now captures common patterns in column names that indicate sensitive data.
 
-Simulating compliance-friendly data engineering pipelines
+- **Improved model accuracy** to ~83% with `class_weight="balanced"` and cleaner feature signals.
 
-Teaching or demonstrating privacy-aware data handling in healthcare or finance
+### 🧠 Prediction Improvements
+
+- **`pii_app.py`** now uses enhanced feature extraction for accurate predictions.
+- Predictions are logged to the console (and optionally to logs).
+- Integrated both **ML predictions** and **regex-based content scanning**.
+
+### 🔍 Pattern-Based Redaction
+
+- Introduced `scan_and_redact_column()` utility using the following regex patterns:
+  - Emails
+  - Phone Numbers
+  - SSNs
+  - IP Addresses
+
+### 🧾 Future Improvements
+
+- Add user input interface to allow:
+  - Selecting which detected PII columns to redact
+  - Confirming or overriding model predictions
+- Create retraining loop with user feedback.
+
 ```
+
+## 🛠️ Usage
+
+### 1. Train the Model
+```
+python models/train_model.py
+Ensure your pii_column.csv is present with labeled column names (is_pii column: 0 = PII, 1 = Non-PII).
+```
+2. Run the API
+```
+python pii_app.py
+Then open your browser at http://127.0.0.1:8000/docs
+```
+3. Use /predict endpoint
+Upload a .csv file
+
+Get back:
+
+Detected PII columns
+
+Redacted file path
+
+Risk score
+
+📂 Project Structure
+```
+DataOps Hub/
+├── pii_app.py                # FastAPI main app
+├── models/
+│   ├── train_model.py        # Trains the Random Forest model
+│   ├── pii_features.py       # Extracts training features
+├── utils/
+│   └── redaction.py          # Regex scanning and redaction logic
+├── uploads/                  # Uploaded CSVs
+├── redacted/                 # Redacted output files
+├── logs/
+│   └── api.log               # Logging API events
+├── pii_column.csv            # Labeled training data
+```
+🤝 Contributing
+Ideas, patterns, and use case-specific features are welcome! You can:
+
+Open an issue with feedback
+
+Suggest a new pattern or feature
+
+Help tune the model with better training samples
+
+📜 License
+MIT License © 2025 Bo
