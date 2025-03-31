@@ -2,138 +2,143 @@
 
 PII Sentinel is a FastAPI-based application that uses machine learning and pattern-based detection to identify and redact Personally Identifiable Information (PII) in CSV files.
 
-## 🚀 Features
+---
+
+🚀 Features
 ```
-- 📁 Upload CSVs and automatically detect sensitive columns.
-- 🧠 Predict PII columns using a trained Random Forest classifier.
-- ✂️ Redact sensitive fields in real time.
-- 🔎 Uses regex scanning for extra pattern-based redaction.
-- 🔧 Includes CLI tools and modular design for scalability.
-- 🧬 Custom feature engineering to boost PII prediction accuracy.
+- 📁 Upload CSVs and automatically detect sensitive columns
+- 🧠 Predict PII columns using a trained Random Forest classifier
+- ✂️ Redact sensitive fields in real time
+- 🔎 Uses regex scanning for extra pattern-based redaction
+- 🧬 Custom feature engineering to boost PII prediction accuracy
+- 🔧 Includes CLI tools and modular design for scalability
+- 🪪 Risk scoring: Returns percentage of predicted PII columns
+- 📦 Redacted CSV download path returned in every response
+
+---
+
+## ⚙️ Recent Changes (v0.2.0)
 ```
-
-## ⚙️ Recent Changes
-
-### ✅ Model and Feature Enhancements
+### ✅ Model & Feature Enhancements
+- Added new metadata **and value-based features**:
+  - `length`, `num_underscores`, `num_digits`, `has_at`, `has_email_keyword`
+  - `pct_email_like`, `pct_phone_like`, `pct_ssn_like`, `pct_ip_like`
+  - `avg_digits_per_val`, `avg_val_len`
+- Improved model accuracy to **~80–83%** using `class_weight="balanced"`
+- Cleaned and expanded training set to include real-world column names and value samples
+- Feature importances, correlation matrix, and PII heatmaps added
 ```
-- **Added new metadata features for training**:
-  - `length`, `num_underscores`, `num_digits`
-  - `has_at`, `has_email_keyword`
-  - `has_digits_only`, `has_alpha_only`
-  - `has_special_chars`, `is_title_case`
+🧠 FastAPI Prediction Improvements
+```
+- `/predict` now uses both column name and sample values to determine PII
+- Extracts first 3 non-null values from each column to match training logic
+- Logs predicted column classifications (PII vs non-PII)
+- Returns:
+  - `filename`
+  - `pii_columns`
+  - `redacted_file`
+  - `risk_score`
 
-- **New feature engineering logic** in `pii_features.py` now captures common patterns in column names that indicate sensitive data.
-
-- **Improved model accuracy** to ~83% with `class_weight="balanced"` and cleaner feature signals.
-
-### 🧠 Prediction Improvements
-
-- **`pii_app.py`** now uses enhanced feature extraction for accurate predictions.
-- Predictions are logged to the console (and optionally to logs).
-- Integrated both **ML predictions** and **regex-based content scanning**.
-
-### 🔍 Pattern-Based Redaction
-
-- Introduced `scan_and_redact_column()` utility using the following regex patterns:
+🔍 Pattern-Based Redaction
+```
+- Regex-driven redaction powered by `scan_and_redact_column()`:
   - Emails
   - Phone Numbers
   - SSNs
   - IP Addresses
-
-### 🧾 Future Improvements
-
-- Add user input interface to allow:
-  - Selecting which detected PII columns to redact
-  - Confirming or overriding model predictions
-- Create retraining loop with user feedback.
-
 ```
+---
 
 ## 🛠️ Usage
-
+```
 ### 1. Train the Model
-```
+
+```bash
 python models/train_model.py
-Ensure your pii_column.csv is present with labeled column names (is_pii column: 0 = PII, 1 = Non-PII).
-```
+Make sure pii_column.csv is present (training data).
+
 2. Run the API
+bash
+Copy
+Edit
+uvicorn pii_app:app --reload
+Then go to http://127.0.0.1:8000/docs
+
+3. Use /predict
+Upload a .csv file. Get back:
+
+✅ Detected PII columns
+
+✂️ Redacted file path
+
+🔒 Risk score
 ```
-python pii_app.py
-Then open your browser at http://127.0.0.1:8000/docs
-```
-3. Use /predict endpoint
-Upload a .csv file
-
-Get back:
-
-Detected PII columns
-
-Redacted file path
-
-Risk score
+🧪 Example Test File
+📄 Included test file: test_user_document.csv
 
 📂 Project Structure
 ```
 DataOps Hub/
-├── pii_app.py                # FastAPI main app
+├── pii_app.py                # FastAPI app
 ├── models/
-│   ├── train_model.py        # Trains the Random Forest model
-│   ├── pii_features.py       # Extracts training features
+│   ├── train_model.py        # Model training
+│   └── pii_features.py       # Feature extraction
 ├── utils/
-│   └── redaction.py          # Regex scanning and redaction logic
-├── uploads/                  # Uploaded CSVs
-├── redacted/                 # Redacted output files
+│   └── redaction.py          # Redaction logic (regex)
+├── uploads/                  # Uploaded files
+├── redacted/                 # Redacted outputs
 ├── logs/
-│   └── api.log               # Logging API events
-├── pii_column.csv            # Labeled training data
+│   └── api.log               # Logs for requests
+├── test_user_document.csv    # Example CSV for testing
+├── CHANGELOG.md              # Feature/version log
+├── README.md                 # You’re here
 ```
+🧾 Future Improvements
+```
+🧠 Prediction UX
+Allow users to confirm or override redactions
+
+Add verbose mode to explain why a column was flagged (feature-based reasoning)
+
+🛠️ CLI Tools
+--redact flag to redact from terminal
+
+Print risk score and flagged columns
+
+🔍 Client Profiles
+Regex rules per client
+
+Support for opt-in sensitivity tiers
+
+📈 Performance Tracking
+Track false positives over time
+
+Store confusion matrix with each training run
+
+📁 More Formats
+Add .xlsx support
+
+🔐 Privacy Modes
+Add differential privacy toggle for pseudonymizing instead of redacting
+
+🧪 Tests & Docs
+Add unit/integration tests
+```
+Improve Swagger docs and upload examples
+
 🤝 Contributing
-Ideas, patterns, and use case-specific features are welcome! You can:
+Ideas, patterns, and use-case-specific suggestions welcome!
 
-Open an issue with feedback
+Open an issue
 
-Suggest a new pattern or feature
+Suggest a new pattern
 
-Help tune the model with better training samples
+Help tune the model
 
-🔄 In Progress / Upcoming
-```
-🖥️ CLI Tool
-Run predictions/redactions from terminal
-Print risk score and detected columns
-Support --redact flag to auto-redact
-
- 🧠 User-selected Redaction
-After prediction, allow users to choose which PII columns to redact
-Add FastAPI support for redaction overrides
-
- 📈 Performance Tracking
-Track prediction accuracy and false positives over time
-Include a confusion matrix in model training
-
- 🔍 Custom Regex Profiles per Client
-Configurable sensitivity settings (email is PII for one client, not for another)
-Client-based regex or column rules
-
- 📁 Support for XLSX files
-Add optional support for Excel input format
-
- 🔐 Differential Privacy Mode
-Add option to "noisify" values instead of full redaction
-Use pseudonymization/anonymization strategies
-
- 🧪 Unit and Integration Tests
-Coverage for model prediction, redaction, and API endpoints
-
- 🧾 API Docs Update
-Improve /docs endpoint descriptions
-Example file and schema in FastAPI Swagger UI
-
- 🧠 Model Tuning
-Add more training data
-Try different classifiers or ensemble methods
-Save feature importance report
-```
+🧑‍💻 Author
+Bo Harris
+🔐 Privacy Engineer & Advocate
+📫 Contact: Bo.k.harris@gmail.com
 
 📜 License
-MIT License © 2025 Bo Harris 
+MIT License © 2025 Bo Harris
