@@ -1,0 +1,4 @@
+name,email,phone,ssn,address,zipcode,device_type,job_title,feedback_rating,ip_address
+Alice Smith,alice@gmail.com,123-456-7890,123-45-6789,123 Main St,90210,iPhone,Engineer,4.5,192.168.1.1
+Bob Johnson,bob@yahoo.com,(555) 123-4567,987-65-4321,456 Elm St,10001,Android,Designer,3.8,10.0.0.2
+Charlie Liu,charlie@outlook.com,999-888-7777,321-54-9876,789 Maple Ave,60614,Windows PC,Manager,5.0,172.16.0.3

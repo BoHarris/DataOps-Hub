@@ -15,6 +15,7 @@
 # ──────────────────────────────────────────────────────────────────────
 
 from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import joblib
 from pydantic import BaseModel
@@ -28,7 +29,13 @@ import re
 import numpy as np
 from utils.redaction import scan_and_redact_column
 app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Refaction API")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  #local frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 feature_columns = [ "length", "num_underscores", "num_digits", "has_at",
     "has_email_keyword", "pct_email_like", "pct_phone_like", 
     "pct_ssn_like", "pct_ip_like", "avg_digits_per_val", "avg_val_len"]

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "../components/card";
+import { Button } from "../components/button";
+import { Input } from "../components/input";
 
 export default function PiiSentinelUI() {
   const [file, setFile] = useState(null);
@@ -27,6 +27,7 @@ export default function PiiSentinelUI() {
     setError(null);
     const formData = new FormData();
     formData.append("file", file);
+    console.log("Uploading file:", file);
 
     try {
       const res = await fetch("http://localhost:8000/predict", {
@@ -39,6 +40,7 @@ export default function PiiSentinelUI() {
       }
 
       const data = await res.json();
+      console.log("Response data:", data);
       setPiiColumns(data.pii_columns);
       setRiskScore(data.risk_score);
       setRedactedFile(data.redacted_file);
@@ -62,37 +64,40 @@ export default function PiiSentinelUI() {
 
       <Card className="w-full max-w-xl">
         <CardContent className="p-6 flex flex-col gap-4">
-          {/* Accessibility improvement: meaningful label */}
-          <label htmlFor="file-upload" className="font-medium">
-            Upload CSV File
-          </label>
-          <Input
-            id="file-upload"
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-          />
+          <div className="flex flex-col items-center gap-4">
+            {/* Accessibility improvement: meaningful label */}
+            <label htmlFor="file-upload" className="font-medium">
+              Upload CSV File
+            </label>
+            <Input
+              id="file-upload"
+              type="file"
+              accept=".csv"
+              required
+              onChange={handleFileChange}
+            />
 
-          <Button onClick={handleUpload} disabled={!file || uploading}>
-            {uploading ? "Scanning..." : "Scan File for PII"}
-          </Button>
+            <Button onClick={handleUpload} disabled={!file || uploading}>
+              {uploading ? "Scanning..." : "Scan File for PII"}
+            </Button>
 
-          {/* Improved loading feedback */}
-          {uploading && (
-            <p className="italic text-sm">Uploading and analyzing file...</p>
-          )}
+            {/* Improved loading feedback */}
+            {uploading && (
+              <p className="italic text-sm">Uploading and analyzing file...</p>
+            )}
 
-          {/* Error message now visible when NOT uploading */}
-          {error && !uploading && (
-            <p className="text-red-600 font-medium">{error}</p>
-          )}
+            {/* Error message now visible when NOT uploading */}
+            {error && !uploading && (
+              <p className="text-red-600 font-medium">{error}</p>
+            )}
 
-          {/* Optional message when no PII columns found */}
-          {piiColumns.length === 0 && !uploading && !error && file && (
-            <p className="text-green-600 font-medium">
-              No PII columns detected.
-            </p>
-          )}
+            {/* Optional message when no PII columns found */}
+            {piiColumns.length === 0 && !uploading && !error && file && (
+              <p className="text-green-600 font-medium">
+                No PII columns detected.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -107,14 +112,22 @@ export default function PiiSentinelUI() {
                 <li key={col}>{col}</li>
               ))}
             </ul>
-            <p className="mt-4 font-medium">Risk Score: {riskScore}</p>
-            <a
-              href={`http://localhost:8000/${redactedFile}`}
-              download
-              className="text-blue-600 underline mt-2 inline-block"
-            >
-              📥 Download Redacted CSV
-            </a>
+            <p className="mt-4 font-medium">
+              Risk Score:{" "}
+              <span className="px-2 py-1 bg-yellow-100 rounded text-yellow-100">
+                {" "}
+                {riskScore}
+              </span>
+            </p>
+            {redactedFile && (
+              <a
+                href={`http://localhost:8000/${redactedFile}`}
+                download
+                className="text-blue-600 underline mt-2 inline-block"
+              >
+                📥 Download Redacted CSV
+              </a>
+            )}
           </CardContent>
         </Card>
       )}
