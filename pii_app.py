@@ -28,6 +28,14 @@ import uuid
 import re
 import numpy as np
 from utils.redaction import scan_and_redact_column
+
+#RIP THIS OUT
+from database.database import Base, engine
+from database.models.user import User
+
+#Create the database
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Refaction API")
 app.add_middleware(
     CORSMiddleware,
