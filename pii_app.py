@@ -28,15 +28,11 @@ import uuid
 import re
 import numpy as np
 from utils.redaction import scan_and_redact_column
-
-#RIP THIS OUT
-from database.database import Base, engine
-from database.models.user import User
-
-#Create the database
-Base.metadata.create_all(bind=engine)
+from fastapi import FastAPI
+from auth_routes import router as auth_router
 
 app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Refaction API")
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  #local frontend
