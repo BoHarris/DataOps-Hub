@@ -1,4 +1,4 @@
-export function TextField({
+export default function TextField({
   label,
   id,
   type = "text",
@@ -8,7 +8,7 @@ export function TextField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlfor={label} className="text-sm font-medium text-gray-700">
+      <label htmlFor={id} className="text-sm font-medium text-gray-700">
         {label}
       </label>
       <input
