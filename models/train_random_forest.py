@@ -28,7 +28,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from models.pii_features import extract_column_features
 
 #Step 1: load the column level dataset
-df = pd.read_csv("pii_column.csv")
+df = pd.read_csv("../pii_column.csv")
 
 #step 2 map PII to numeric values
 df["is_pii"] = df["pii"].map({"yes": 0, "no": 1}) #note 0 =PII
