@@ -30256,3 +30256,14 @@
 2025-04-07 03:10:17,505 - 1 change detected
 2025-04-07 03:10:17,914 - 1 change detected
 2025-04-07 03:10:18,324 - 1 change detected
+2025-04-11 01:35:24,719 - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Bokha\AppData\Local\Programs\Python\Python312\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-04-11 01:40:02,536 - Processed file: test_user_document.csv | PII Columns: ['name', 'email', 'phone', 'ssn', 'address', 'ip_address']
+2025-04-11 01:42:59,234 - Processed file: test_user_document.csv | PII Columns: ['name', 'email', 'phone', 'ssn', 'address', 'ip_address']
+2025-04-11 01:44:18,523 - Processed file: test_user_document.csv | PII Columns: ['name', 'email', 'phone', 'ssn', 'address', 'ip_address']
+2025-04-11 02:20:48,030 - Processed file: test_user_document.csv | PII Columns: ['name', 'email', 'phone', 'ssn', 'address', 'ip_address']
+2025-04-11 02:22:03,442 - Processed file: test_user_document.csv | PII Columns: ['name', 'email', 'phone', 'ssn', 'address', 'ip_address']

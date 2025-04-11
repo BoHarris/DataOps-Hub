@@ -19,9 +19,14 @@ function Register() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      setMessage(data.message || data.detail);
+      if (Array.isArray(data.detail)) {
+        const errors = data.detail.map((d) => d.msg).join(",");
+        setMessage(errors);
+      } else {
+        setMessage(data.message || data.details || "Unknown Response");
+      }
     } catch (err) {
-      setMessage("Error registering user");
+      setMessage("Error registering user: " + err.message);
     } finally {
       setLoading(false);
     }
