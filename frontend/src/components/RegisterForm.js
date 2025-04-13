@@ -34,7 +34,6 @@ function Register() {
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center min-h-screen">
-      <h1 className="text-2xl font-bold">Register</h1>
       <TextField
         id="email"
         label="Email"
