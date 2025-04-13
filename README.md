@@ -157,5 +157,52 @@ Bo Harris
   - CSV preview before scan
 - Stripe payment flow or scan quota tracking setup
 
+
+📦 ALEX Change Log – April 13, 2025
+Branch: feature/device-auth-navbar-ui
+
+✨ New Features
+🔐 Device Trust Token (Phase 1)
+
+Added DeviceToken model with token, device_name, ip_address, and timestamps
+
+Integrated secure token generation and assignment during registration
+
+Login now validates using password + token to simulate trusted device recognition
+
+Separate DB table improves security isolation and future scalability
+
+🧭 Global Navigation Bar (Navbar)
+
+Built new Navbar.js component using TailwindCSS
+
+Added routing links: Home, Upload, Register, Login
+
+Integrated across all pages via App.js
+
+📄 React Page Structure Setup
+
+Created Home.js, Upload.js, Register.js, and Login.js under pages/
+
+Hooked up to react-router-dom routes
+
+Connected RegisterForm component to /register page
+
+🛠 Improvements
+Applied basic Tailwind styling to all pages
+
+Added padding and vertical centering for form UX polish
+
+Updated navbar to provide consistent navigation experience
+
+🚧 Known/Deferred Tasks
+Device trust UI not yet available (for review/revoke)
+
+No fallback yet for pre-token users (flagged for next sprint)
+
+IP risk scoring and token rotation not yet implemented
+
+2FA via Nametag integration pending
+
 📜 License
 MIT License © 2025 Bo Harris
