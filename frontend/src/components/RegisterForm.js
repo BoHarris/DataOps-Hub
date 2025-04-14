@@ -33,7 +33,7 @@ function Register() {
   };
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-screen">
+    <div className="flex flex-col gap-4 items-center justify-center py-12">
       <TextField
         id="email"
         label="Email"

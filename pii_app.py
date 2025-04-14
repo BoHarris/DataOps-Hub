@@ -1,20 +1,4 @@
-# ──────────────────────────────────────────────────────────────────────
-# © 2025 PII Sentinel™
-# Proprietary & Confidential – All Rights Reserved
-#
-# This software is the confidential and proprietary information of
-# PII Sentinel™ ("Confidential Information"). You shall not disclose
-# such Confidential Information and shall use it only in accordance
-# with the terms of a binding agreement or license.
-#
-# Unauthorized reproduction, modification, or distribution of this
-# software or its components, in whole or in part, is strictly prohibited.
-#
-# For licensing, partnership, or commercial use, contact:
-# Bo.k.harris@gmail.com
-# ──────────────────────────────────────────────────────────────────────
-
-from fastapi import FastAPI, File, UploadFile, Form, Request, Query
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import joblib
@@ -35,51 +19,31 @@ app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Ref
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # local frontend
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 Base.metadata.create_all(bind=engine)
-
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 @app.exception_handler(Exception)
 async def debug_exception_handler(request: Request, exc: Exception):
     import traceback
     traceback.print_exc()
-    return JSONResponse(
-        status_code=500,
-        content={"details": str(exc)},
-    )
+    return JSONResponse(status_code=500, content={"details": str(exc)})
 
-# Removed unused MODEL_PATH + single-model load
-# Instead, load both models up front
-rf_model = joblib.load("models/pii_classifier.pkl")  
-xgb_model = joblib.load("models/xgboost_model.pkl")  
+xgb_model = joblib.load("models/xgboost_model.pkl")
 
-# Model features
-feature_columns = [
-    "length", "num_underscores", "num_digits", "has_at",
-    "has_email_keyword", "pct_email_like", "pct_phone_like",
-    "pct_ssn_like", "pct_ip_like", "avg_digits_per_val", "avg_val_len"
-]
-
-# Set up logging
-logging.basicConfig(filename="logs/api.log", level=logging.INFO,
-                    format='%(asctime)s - %(message)s')
-
-# Ensure folders exist
+logging.basicConfig(filename="logs/api.log", level=logging.INFO, format='%(asctime)s - %(message)s')
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("redacted", exist_ok=True)
 
-# Regex patterns
-EMAIL_RE = re.compile(r"[^@]+@[^@]+\.[^@]+")
-PHONE_RE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
-SSN_RE = re.compile(r"\d{3}-\d{2}-\d{4}")
-IP_RE = re.compile(r"(?:\d{1,3}\.){3}\d{1,3}")
-
+EMAIL_RE = re.compile(r"[^@]+@[^@]+\.[^@]+")  
+PHONE_RE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")  
+SSN_RE = re.compile(r"\d{3}-\d{2}-\d{4}")  
+IP_RE = re.compile(r"(?:\d{1,3}\.){3}\d{1,3}") 
 class PredictionResult(BaseModel):
     filename: str
     pii_columns: List[str]
@@ -87,7 +51,7 @@ class PredictionResult(BaseModel):
     risk_score: float
 
 @app.post("/predict", response_model=PredictionResult)
-async def predict(file: UploadFile = File(...), model: str = Query(default="xgboost")):  #model toggle added
+async def predict(file: UploadFile = File(...)):
     file_id = str(uuid.uuid4())
     file_path = f"uploads/{file_id}_{file.filename}"
     with open(file_path, "wb") as buffer:
@@ -119,11 +83,55 @@ async def predict(file: UploadFile = File(...), model: str = Query(default="xgbo
     X["avg_digits_per_val"] = X["parsed_values"].apply(lambda v: np.mean([sum(c.isdigit() for c in str(i)) for i in v]) if v else 0)
     X["avg_val_len"] = X["parsed_values"].apply(lambda v: np.mean([len(str(i)) for i in v]) if v else 0)
 
-    # Predict based on model query
-    predictions = xgb_model.predict(X[feature_columns]) if model == "xgboost" else rf_model.predict(X[feature_columns])  
+    def contains_dob_pattern(values):
+        dob_re = re.compile(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})|(\d{4}[/-]\d{1,2}[/-]\d{1,2})")  # ✅ FIXED
+        return any(bool(dob_re.search(str(v))) for v in values)
 
-    #  Define pii_columns correctly
-    pii_columns = [col for col, is_pii in zip(features, predictions) if is_pii == 0] 
+    def contains_gender_term(values):
+        gender_terms = {"male", "female", "nonbinary", "trans", "woman", "man"}  # simplify
+        return any(str(v).strip().lower() in gender_terms for v in values)
+
+    def contains_street_suffix(values):
+        street_suffixes = {"st", "street", "ave", "road", "rd", "blvd", "ln", "lane"}
+        return any(str(v).strip().lower().split()[-1] in street_suffixes for v in values)
+
+    def contains_city_name(values):
+        cities = {"new york", "los angeles", "miami"}
+        return any(str(v).lower() in cities for v in values)
+
+    def contains_known_name(values):
+        names = {"alice", "bob", "charlie", "john", "jane"}
+        return any(any(word.lower() in names for word in str(v).split()) for v in values)
+
+    def contains_zip_code_pattern(values):
+        zip_code_re = re.compile(r"\b\d{5}(?:-\d{4})?\b")  
+        return any(bool(zip_code_re.search(str(v))) for v in values)
+
+    def contains_phone_pattern(values):
+        phone_patterns = [
+            re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"), 
+            re.compile(r"\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}") 
+        ]
+        return any(any(p.search(str(v)) for p in phone_patterns) for v in values)
+
+    X["has_dob_pattern"] = X["parsed_values"].apply(contains_dob_pattern)
+    X["has_gender_term"] = X["parsed_values"].apply(contains_gender_term)
+    X["has_street_suffix"] = X["parsed_values"].apply(contains_street_suffix)
+    X["has_city_name"] = X["parsed_values"].apply(contains_city_name)
+    X["has_known_name"] = X["parsed_values"].apply(contains_known_name)
+    X["has_zip_pattern"] = X["parsed_values"].apply(contains_zip_code_pattern)
+    X["has_phone_pattern"] = X["parsed_values"].apply(contains_phone_pattern)
+
+    feature_columns = [
+        "length", "num_underscores", "num_digits", "has_at",
+        "has_email_keyword", "pct_email_like", "pct_phone_like",
+        "pct_ssn_like", "pct_ip_like", "avg_digits_per_val", "avg_val_len",
+        "has_dob_pattern", "has_gender_term", "has_street_suffix",
+        "has_city_name", "has_known_name", "has_zip_pattern", "has_phone_pattern"
+    ]
+
+    predictions = xgb_model.predict(X[feature_columns])
+    pii_columns = [col for col, is_pii in zip(features, predictions) if is_pii == 0]
 
     redacted_df = df.copy()
     for col in pii_columns:
