@@ -1,4 +1,0 @@
-name,email,phone,ssn,address,zipcode,device_type,job_title,feedback_rating,ip_address
-Alice Smith,[REDACTED],[REDACTED],[REDACTED],123 Main St,90210,iPhone,Engineer,4.5,[REDACTED]
-Bob Johnson,[REDACTED],(555) 123-4567,[REDACTED],456 Elm St,10001,Android,Designer,3.8,[REDACTED]
-Charlie Liu,[REDACTED],[REDACTED],[REDACTED],789 Maple Ave,60614,Windows PC,Manager,5.0,[REDACTED]
