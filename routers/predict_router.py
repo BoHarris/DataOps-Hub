@@ -1,59 +1,37 @@
-from fastapi import FastAPI, File, UploadFile, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, File, UploadFile, Request
 from fastapi.responses import JSONResponse
-import joblib
 from pydantic import BaseModel
 import pandas as pd
-from typing import List
-import logging
 import os
 import shutil
 import uuid
 import re
 import numpy as np
+import logging
+import joblib
+
 from utils.redaction import scan_and_redact_column
-from auth_routes import router as auth_router
-from database.database import Base, engine
 
-app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Refaction API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-Base.metadata.create_all(bind=engine)
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
-
-@app.exception_handler(Exception)
-async def debug_exception_handler(request: Request, exc: Exception):
-    import traceback
-    traceback.print_exc()
-    return JSONResponse(status_code=500, content={"details": str(exc)})
+router = APIRouter(prefix="/predict", tags=["Prediction"])
 
 xgb_model = joblib.load("models/xgboost_model.pkl")
 
-logging.basicConfig(filename="logs/api.log", level=logging.INFO, format='%(asctime)s - %(message)s')
-os.makedirs("uploads", exist_ok=True)
-os.makedirs("redacted", exist_ok=True)
+EMAIL_RE = re.compile(r"[^@]+@[^@]+\.[^@]+")
+PHONE_RE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
+SSN_RE = re.compile(r"\d{3}-\d{2}-\d{4}")
+IP_RE = re.compile(r"(?:\d{1,3}\.){3}\d{1,3}")
 
-EMAIL_RE = re.compile(r"[^@]+@[^@]+\.[^@]+")  
-PHONE_RE = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")  
-SSN_RE = re.compile(r"\d{3}-\d{2}-\d{4}")  
-IP_RE = re.compile(r"(?:\d{1,3}\.){3}\d{1,3}") 
 class PredictionResult(BaseModel):
     filename: str
-    pii_columns: List[str]
+    pii_columns: list[str]
     redacted_file: str
     risk_score: float
 
-@app.post("/predict", response_model=PredictionResult)
+@router.post("/", response_model=PredictionResult)
 async def predict(file: UploadFile = File(...)):
     file_id = str(uuid.uuid4())
-    file_path = f"uploads/{file_id}_{file.filename}"
+    ext = os.path.splitext(file.filename)[1]
+    file_path = f"uploads/{file_id}{ext}"
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
@@ -84,11 +62,11 @@ async def predict(file: UploadFile = File(...)):
     X["avg_val_len"] = X["parsed_values"].apply(lambda v: np.mean([len(str(i)) for i in v]) if v else 0)
 
     def contains_dob_pattern(values):
-        dob_re = re.compile(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})|(\d{4}[/-]\d{1,2}[/-]\d{1,2})")  # ✅ FIXED
+        dob_re = re.compile(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})|(\d{4}[/-]\d{1,2}[/-]\d{1,2})")
         return any(bool(dob_re.search(str(v))) for v in values)
 
     def contains_gender_term(values):
-        gender_terms = {"male", "female", "nonbinary", "trans", "woman", "man"}  # simplify
+        gender_terms = {"male", "female", "nonbinary", "trans", "woman", "man"}
         return any(str(v).strip().lower() in gender_terms for v in values)
 
     def contains_street_suffix(values):
@@ -104,13 +82,13 @@ async def predict(file: UploadFile = File(...)):
         return any(any(word.lower() in names for word in str(v).split()) for v in values)
 
     def contains_zip_code_pattern(values):
-        zip_code_re = re.compile(r"\b\d{5}(?:-\d{4})?\b")  
+        zip_code_re = re.compile(r"\b\d{5}(?:-\d{4})?\b")
         return any(bool(zip_code_re.search(str(v))) for v in values)
 
     def contains_phone_pattern(values):
         phone_patterns = [
-            re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"), 
-            re.compile(r"\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}") 
+            re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"),
+            re.compile(r"\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
         ]
         return any(any(p.search(str(v)) for p in phone_patterns) for v in values)
 
@@ -137,7 +115,7 @@ async def predict(file: UploadFile = File(...)):
     for col in pii_columns:
         redacted_df[col] = scan_and_redact_column(redacted_df[col])
 
-    redacted_path = f"redacted/redacted_{file_id}_{file.filename}"
+    redacted_path = f"redacted/redacted_{file_id}{ext}"
     redacted_df.to_csv(redacted_path, index=False)
 
     logging.info(f"Processed file: {file.filename} | PII Columns: {pii_columns}")
@@ -148,11 +126,3 @@ async def predict(file: UploadFile = File(...)):
         redacted_file=redacted_path,
         risk_score=round(len(pii_columns) / len(df.columns), 2)
     )
-
-@app.get("/")
-def root():
-    return {"message": "Welcome to PII Sentinel API. Upload a CSV to detect and redact PII."}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("pii_app:app", host="127.0.0.1", port=8000, reload=True)

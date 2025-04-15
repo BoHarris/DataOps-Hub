@@ -8,6 +8,8 @@ PII_PATTERNS = {
     "ip": r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
     "zip": r'\b\d{5}(?:-\d{4})?\b',
     "dob": r'(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})|(\d{4}[/-]\d{1,2}[/-]\d{1,2})',
+    "city": r'\b(?:new york|los angeles|miami|chicago|houston|dallas|atlanta)\b',
+    "full_name": r'\b(?:[A-Z][a-z]+\s[A-Z][a-z]+)\b'  # Example: "John Doe"
 }
 
 # Expandable known terms
@@ -27,7 +29,7 @@ STREET_SUFFIXES = {
 
 def contains_any_term(value: str, term_set: set) -> bool:
     value = value.strip().lower()
-    return any(term in value.split() for term in term_set)
+    return any(re.search(rf'\b{re.escape(term)}\b', value) for term in term_set)
 
 def scan_and_redact_column(series: pd.Series) -> pd.Series:
     redacted = series.astype(str)
@@ -36,7 +38,7 @@ def scan_and_redact_column(series: pd.Series) -> pd.Series:
         lower_val = val.lower()
 
         for label, regex in PII_PATTERNS.items():
-            if re.search(regex, val):
+            if re.search(regex, val, flags=re.IGNORECASE):
                 return f"[REDACTED_{label.upper()}]"
 
         if contains_any_term(lower_val, GENDER_TERMS):

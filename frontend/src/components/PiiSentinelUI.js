@@ -117,10 +117,10 @@ export default function PiiSentinelUI() {
             </div>
             <div className="mt-4">
               <p className="font-semibold">
-                Risk Score:{" "}
+                Risk Score before redaction:{" "}
                 <span className="inline-block bg-gray-700 px-2 py-1 rounded text-white">
                   {" "}
-                  {riskScore}
+                  {Math.roung(riskScore * 100).toFixed(1)}%
                 </span>
               </p>
             </div>
