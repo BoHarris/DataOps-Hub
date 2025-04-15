@@ -2,23 +2,35 @@ import { Link } from "react-router-dom";
 
 export default function Navbar() {
   return (
-    <nav className="bg-gray-900 title-white px-4 py-4 py-3 shadow-ms flex justify-Center min-h-screen pt-24">
+    <nav className="bg-gray-900 text-white px-6 py-4 shadow-md flex justify-between items-center">
       <div className="text-xl font-bold tracking-wide">
         <Link to="/">
-          ALEX<span className="text-blue-400">.ai</span>
+          ALEX<span className="text-red-400">.ai</span>
         </Link>
       </div>
       <div className="space-x-4">
-        <Link to="/" className="hover:text-blue-300">
+        <Link
+          to="/"
+          className="hover:text-blue-300 transition-colors duration-200 ml-6 @media (max-width: 768px) { margin-left: 0; }"
+        >
           Home
         </Link>
-        <Link to="/upload" className="hover:text-blue-300">
+        <Link
+          to="/upload"
+          className="hover:text-blue-300 transition-colors duration-200 ml-6 @media (max-width: 768px) { margin-left: 0; }"
+        >
           Upload
         </Link>
-        <Link to="/register" className="hover:text-blue-300">
+        <Link
+          to="/register"
+          className="hover:text-blue-300 transition-colors duration-200 ml-6 @media (max-width: 768px) { margin-left: 0; }"
+        >
           Register
         </Link>
-        <Link to="/login" className="hover:text-blue-300">
+        <Link
+          to="/login"
+          className="hover:text-blue-300 transition-colors duration-200 ml-6 @media (max-width: 768px) { margin-left: 0; }"
+        >
           Login
         </Link>
         {/* Future links for other pages */}

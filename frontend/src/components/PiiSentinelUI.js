@@ -57,16 +57,19 @@ export default function PiiSentinelUI() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6">
+    <div className="py-12 px-4 flex flex-col items-center space-y-8 max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold">
         🔐 PII Sentinel – Privacy as a Service
       </h1>
 
-      <Card className="w-full max-w-xl">
-        <CardContent className="p-6 flex flex-col gap-4">
-          <div className="flex flex-col items-center gap-4">
+      <Card className="w-full shadow-md border border-gray-300 bg-white">
+        <CardContent className="p-6 space-y-5">
+          <div className="space-y-3">
             {/* Accessibility improvement: meaningful label */}
-            <label htmlFor="file-upload" className="font-medium">
+            <label
+              htmlFor="file-upload"
+              className="block font-semibold text-gray-800"
+            >
               Upload CSV File
             </label>
             <Input
@@ -83,17 +86,19 @@ export default function PiiSentinelUI() {
 
             {/* Improved loading feedback */}
             {uploading && (
-              <p className="italic text-sm">Uploading and analyzing file...</p>
+              <p className="text-sm italic text-gray-500">
+                Uploading and analyzing file...
+              </p>
             )}
 
             {/* Error message now visible when NOT uploading */}
             {error && !uploading && (
-              <p className="text-red-600 font-medium">{error}</p>
+              <p className="text-sm text-red-600 font-medium">{error}</p>
             )}
 
             {/* Optional message when no PII columns found */}
             {piiColumns.length === 0 && !uploading && !error && file && (
-              <p className="text-green-600 font-medium">
+              <p className="text-sm text-green-600 font-medium">
                 No PII columns detected.
               </p>
             )}
@@ -102,28 +107,29 @@ export default function PiiSentinelUI() {
       </Card>
 
       {piiColumns.length > 0 && (
-        <Card className="w-full max-w-xl">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-2">
-              🔎 PII Columns Detected:
-            </h2>
-            <ul className="list-disc pl-6 text-red-600">
+        <Card className="w-full shadow-md bg-gray-800 border border-gray-600 text-white">
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-bold">🔎 PII Columns Detected:</h2>
+            <div className="space-y-1 text-sm">
               {piiColumns.map((col) => (
-                <li key={col}>{col}</li>
+                <div key={col}>{col}</div>
               ))}
-            </ul>
-            <p className="mt-4 font-medium">
-              Risk Score:{" "}
-              <span className="px-2 py-1 bg-yellow-100 rounded text-yellow-100">
-                {" "}
-                {riskScore}
-              </span>
-            </p>
+            </div>
+            <div className="mt-4">
+              <p className="font-semibold">
+                Risk Score before redaction:{" "}
+                <span className="inline-block bg-gray-700 px-2 py-1 rounded text-white">
+                  {" "}
+                  {Math.roung(riskScore * 100).toFixed(1)}%
+                </span>
+              </p>
+            </div>
+
             {redactedFile && (
               <a
                 href={`http://localhost:8000/${redactedFile}`}
                 download
-                className="text-blue-600 underline mt-2 inline-block"
+                className="inline-block text-blue-400 underline my-2"
               >
                 📥 Download Redacted CSV
               </a>
