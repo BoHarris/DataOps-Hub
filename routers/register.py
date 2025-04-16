@@ -20,7 +20,7 @@ TIER_LIMITS = {
     "business": None
 }
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Register"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto" )
 
 
@@ -31,8 +31,7 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, description="Password must be at least 8 characters long")
     tier: str = Field(default="free", description="User tier, default is 'free'")
-    device_name: str = Field(description="Name of the device")
-    ip_address: str = Field(description="IP address of the device")
+    device_fingerprint: str = Field(..., description="Unique device fingerprint")
 
 # ──────────────────────────────────────────────────────────────────────
 # User Registration Endpoint
@@ -42,6 +41,7 @@ class RegisterRequest(BaseModel):
 
 @router.post("/register", response_model=dict)
 def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
+    email = data.email.strip().lower()
     logging.info(f"Registering user: {data.email}")
     existing_user = db.query(User).filter(User.email == data.email).first()
     if existing_user:
@@ -53,9 +53,9 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     tier=data.tier.lower()
     new_user = User(
         name= data.name,
-        email=data.email, 
+        email=email, 
         hashed_password=hashed_password,
-       tier=tier
+        tier=tier
     )
     db.add(new_user)
     db.commit()
@@ -73,10 +73,9 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
             )
     
     device_token = DeviceToken(
-         user_id=new_user.id,
+        user_id=new_user.id,
         token=secrets.token_hex(32),
-        device_name=data.device_name,
-        ip_address=data.ip_address,
+        device_fingerprint=data.device_fingerprint,
         created_at=datetime.now(timezone.utc),
         last_used_at=datetime.now(timezone.utc)
     )

@@ -16,6 +16,7 @@ from database.database import Base, engine
 from routers import register,login, protected
 from routers.predict_router import router as predict_router
 
+
 app = FastAPI(title="PII Sentinel", description="Real-Time PII Detection and Refaction API")
 
 app.add_middleware(
@@ -50,4 +51,4 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("pii_app:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
