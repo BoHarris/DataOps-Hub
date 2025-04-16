@@ -41,18 +41,16 @@ Returns:
 ```
 🛠️ Usage Guide
 1. Train the Model
-bash
-Copy
-Edit
-python models/train_model.py
+```
+python models/train_xgboost_model.py
 Make sure pii_column.csv is present for initial training.
+```
 
 2. Start the API
-bash
-Copy
-Edit
+```
 uvicorn pii_app:app --reload
 Visit: localhost:8000/docs
+```
 
 3. Upload & Redact
 Upload .csv
@@ -88,6 +86,7 @@ ALEX/
 ✅ Added routing, login/register pages, navbar, and improved UI/UX polish
 
 🧾 Roadmap
+```
 🔍 UX Features
 ✅ Redacted preview & download link
 
@@ -118,6 +117,19 @@ ALEX/
 ✅ Regex + ML hybrid redaction in production
 
 ⏳ Tiered client privacy templates (configurable rules)
+```
+```
+🌲 Custom Real-Time Random Tree Model
+ALEX previously leveraged a custom Random Tree (RT) model for real-time PII classification. This lightweight model was optimized for speed and interpretability, making it ideal for early detection use cases and on-device processing.
+Key highlights:
+🧠 Trained using a curated set of metadata and content-based features
+⚡ Ultra-fast inference times suited for real-time scanning
+🔍 Clear decision paths to explain why a column was flagged as PII
+🧪 Served as a foundation before transitioning to more advanced ensemble models like XGBoost
+While ALEX has since upgraded its core model, the RT implementation proved essential for validating key detection strategies and setting the groundwork for more accurate PII protection.
+It will continue to evolve as part of a multi-layered, AI-driven pipeline designed to ensure robust, privacy-first data handling.
+/model/archive/train_random_forest.py
+```
 
 🤝 Contribute
 Have an idea, pattern, or feedback?
