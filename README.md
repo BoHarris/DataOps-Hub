@@ -1,4 +1,4 @@
-🔐 ALEX – PII Sentinel API
+#🔐 ALEX – PII Sentinel API
 A real-time, machine learning-powered privacy scanner to detect and redact Personally Identifiable Information (PII) from structured datasets.
 
 🚀 Key Features
@@ -31,15 +31,14 @@ Performance tracked via confusion matrix & prediction heatmaps
 📈 API Output (/predict)
 Returns:
 
-json
-Copy
-Edit
+```
 {
   "filename": "example.csv",
   "pii_columns": ["email", "ssn"],
   "risk_score": "67%",
   "redacted_file": "redacted/example.csv"
 }
+```
 🛠️ Usage Guide
 1. Train the Model
 bash
@@ -63,9 +62,7 @@ View detected columns
 Get downloadable redacted file + risk score
 
 📁 Project Structure
-bash
-Copy
-Edit
+```
 ALEX/
 ├── pii_app.py                # FastAPI app
 ├── models/
@@ -78,6 +75,7 @@ ALEX/
 ├── logs/                    # API logs
 ├── test_user_document.csv   # Sample test file
 ├── README.md
+```
 📆 Recent Updates (April 13, 2025)
 ✅ Switched to XGBoost classifier with enhanced metadata + value feature extraction
 
