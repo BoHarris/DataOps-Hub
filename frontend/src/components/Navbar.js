@@ -1,6 +1,8 @@
+import React from "react";
 import { Link } from "react-router-dom";
+import LogoutButton from "./logout";
 
-export default function Navbar() {
+function Navbar() {
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 shadow-md flex justify-between items-center">
       <div className="text-xl font-bold tracking-wide">
@@ -33,6 +35,7 @@ export default function Navbar() {
         >
           Login
         </Link>
+        <LogoutButton />
         {/* Future links for other pages */}
         {/* <Link to="/about" className="hover:text-blue-300">About</Link> */}
         {/* <Link to="/contact" className="hover:text-blue-300">Contact</Link> */}
@@ -42,3 +45,4 @@ export default function Navbar() {
     </nav>
   );
 }
+export default Navbar;

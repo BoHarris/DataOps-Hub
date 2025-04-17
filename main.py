@@ -1,19 +1,11 @@
-from fastapi import FastAPI, File, UploadFile, Request
+from fastapi import FastAPI, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import joblib
-from pydantic import BaseModel
-import pandas as pd
-from typing import List
 import logging
 import os
-import shutil
-import uuid
-import re
-import numpy as np
 from utils.redaction import scan_and_redact_column
 from database.database import Base, engine
-from routers import register,login, protected
+from routers import register,login, protected, logout, refresh
 from routers.predict_router import router as predict_router
 
 
@@ -30,6 +22,8 @@ app.include_router(register.router)
 app.include_router(login.router)
 app.include_router(protected.router)
 app.include_router(predict_router)
+app.include_router(logout.router)
+app.include_router(refresh.router)
 
 Base.metadata.create_all(bind=engine)
 
